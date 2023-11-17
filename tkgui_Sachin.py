@@ -393,8 +393,8 @@ class Meter(Canvas):
 meters = Frame(root,width=width,height=width,bg="white")
 speed = Meter(meters,width=width,height=height)
 speed.draw(min_speed,max_speed,step_speed,"Speed","KMPH")
-speed.pack(side=RIGHT)
-meters.pack(side=RIGHT, anchor=SE,fill=Y,expand=True)
+speed.pack(side=LEFT)
+meters.pack(side=LEFT, anchor=SE,fill=Y,expand=True)
 meters = Frame(root,width=width,height=width,bg="white")
 rpm = Meter(meters,width=width,height=height)
 rpm.draw(min_rpm,max_rpm,step_rpm,"RPM","x1000")
@@ -433,7 +433,7 @@ def meter_update(): #funtion that updates the gauges
     x.config(text=kmph)
     y.config(text=rev)
     root.after(500, meter_update)
-    print('3')
+    
 
 i=0
 while True:
