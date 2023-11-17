@@ -417,25 +417,51 @@ y.pack()
 
 
 
-
-while True:
-    s = [5, 6, 7, 8]
-    # arr=s.split();
-    v = StringVar()
-    kmph = (int)(s[0])
-    rev = (int)(s[1])
+def meter_update(): #funtion that updates the gauges
+    i=0
+    s = []
+    r = []
+    for i in range(0, 1000):
+        a = random.randint(1, 8)
+        s.append(a)
+        n = random.randint(1, 200)
+        r.append(n)
+    kmph = int(r[i])
+    rev = int(s[i])
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
     x.config(text=kmph)
     y.config(text=rev)
-    root.update_idletasks()
-    update_sine_wave()
-    root.mainloop()
-    root.update()
+    root.after(500, meter_update)
+    print('3')
 
-update_sine_wave()
+i=0
+while True:
+   s = []
+   r = []
+   for i in range(0,1000):
+       a= random.randint(1,8)
+       s.append(a)
+       n = random.randint(1,200)
+       r.append(n)
+   kmph=int(r[i])
+   rev=int(s[i])
+   speed.draw_needle(kmph)
+   rpm.draw_needle(rev)
+   x.config(text=kmph)
+   y.config(text=rev)
+   update_sine_wave()
+   root.update_idletasks()
+   root.update()
+   root.after(500, meter_update)
+   root.mainloop()
+   time.sleep(1)
+   i+=1
 
-root.mainloop()
+
+
+
+
 
 
 
