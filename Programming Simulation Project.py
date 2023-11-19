@@ -192,12 +192,20 @@ def update_simulation():
     turbo = turbo_slider.get()
     states = simulation(throttle, turbo)
     simulation_plots[0].clear()  # Clear first subplot
-    simulation_plots[0].plot(states.ca, states.P)  # Plot on first subplot
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
+    simulation_plots[0].set_xlabel('Crank Angle (degrees)')
+    simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
+    simulation_plots[0].set_ylim(0,20000000)
+    simulation_plots[0].set_xlim(0,13)
+    simulation_plots[0].plot(states.ca, states.P)
 
     simulation_plots[1].clear()  # Clear second subplot
-    simulation_plots[1].plot(states.V, states.P)  # Plot on second subplot
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
+    simulation_plots[1].set_xlabel('Volume (L)')
+    #simulation_plots[1].set_ylabel('Cylinder Pressure (kPa)')
+    simulation_plots[1].set_ylim(0, 20000000)
+    #simulation_plots[1].set_xlim(0, 0.000006)
+    simulation_plots[1].plot(states.V, states.P)
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
 
