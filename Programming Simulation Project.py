@@ -131,7 +131,7 @@ def simulation(throttle):
     # Fuel mass, injector open and close timings
     injector_open = 350. / 180. * np.pi
     injector_close = 365. / 180. * np.pi
-    injector_mass = 3.2e-5 * throttle * 1.5  # kg
+    injector_mass = 1.5e-5 + (throttle * .1 * 1.5e-5)   # kg
 
     # injector is modeled as a mass flow controller
     injector_mfc = ct.MassFlowController(injector, cyl)
@@ -173,14 +173,14 @@ def update_simulation():
     gearshift = gearshift_slider.get()
     throttle = throttle_slider.get()
     states = simulation(throttle)
-    sine_wave_plots[0].clear()  # Clear first subplot
-    sine_wave_plots[0].plot(states.ca, states.P)  # Plot on first subplot
-    sine_wave_plots[0].set_title('P vs crank angle')
+    simulation_plots[0].clear()  # Clear first subplot
+    simulation_plots[0].plot(states.ca, states.P)  # Plot on first subplot
+    simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
 
-    sine_wave_plots[1].clear()  # Clear second subplot
-    sine_wave_plots[1].plot(states.V, states.P)  # Plot on second subplot
-    sine_wave_plots[1].set_title('P vs V')
-    sine_wave_canvas.draw()
+    simulation_plots[1].clear()  # Clear second subplot
+    simulation_plots[1].plot(states.V, states.P)  # Plot on second subplot
+    simulation_plots[1].set_title('Cylinder Pressure vs Volume')
+    simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
 
 
@@ -194,7 +194,7 @@ min_rpm, max_rpm = 0, 8  # Max and min values on the dial. Adjust according to n
 step_rpm = 1  # Least count or smallest division on the dial which has a text value displayed. Adjust according to need.
 
 root = tk.Tk()
-root.title("Real-Time Sine Wave Simulation")
+root.title("Real-Time Diesel Engine Simulation")
 meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in the meter. Feel free to play around.
 temp = [5, 7, 9, 2, 3]
 
@@ -204,9 +204,9 @@ throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="verti
 throttle_slider.pack(side=tk.LEFT)
 
 fig = Figure(figsize=(8, 4), dpi=100)
-sine_wave_plots = [fig.add_subplot(1, 2, i + 1) for i in range(2)]  # Create two subplots
-sine_wave_canvas = FigureCanvasTkAgg(fig, master=root)
-sine_wave_canvas.get_tk_widget().pack()
+simulation_plots = [fig.add_subplot(1, 2, i + 1) for i in range(2)]  # Create two subplots
+simulation_canvas = FigureCanvasTkAgg(fig, master=root)
+simulation_canvas.get_tk_widget().pack()
 
 
 def setTitles():
@@ -260,11 +260,8 @@ class Meter(Canvas):
                                        x0 + ray * math.sin(5 * math.pi / 4) * len1,
                                        y0 - ray * math.cos(5 * math.pi / 4) * len1,
                                        width=2, fill="#FFF")
-        lb1 = Label(self, compound='right', textvariable=v)
 
-    # Draws the needle based on the speed or input value.
     def draw_needle(self, v):
-        print(v)  # Not required, but helps in debugging.
         v = max(v, self.vmin)  # If input is less than 0 then the pointer stays at 0
         v = min(v,
                 self.vmax)  # If input is greater than the greatest value then the pointer stays at the maximum value.
@@ -301,10 +298,10 @@ y.pack()
 
 
 def meter_update():  # funtion that updates the gauges
-    # Calculate engine speed based on throttle position and gear shift
+
     Speed_throttle = throttle_slider.get()
     Speed_Gearshift = gearshift_slider.get()
-    kmph = Engine_Speed * Speed_throttle * (11/12) / 5
+    kmph = Engine_Speed * Speed_throttle * (11/12) / 4
     rev = Engine_Speed * Speed_Gearshift / 10
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
