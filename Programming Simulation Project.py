@@ -217,25 +217,28 @@ meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in
 
 # Create the slider objects and position
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=10, orient="vertical")
-gearshift_slider.pack(side=tk.LEFT)
+gearshift_slider.grid(row=5,column=0, rowspan = 3)
 throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
-throttle_slider.pack(side=tk.LEFT)
+throttle_slider.grid(row=5,column=1, rowspan = 3)
 turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
-turbo_slider.pack(side=tk.LEFT)
+turbo_slider.grid(row =5, column=2, rowspan= 3)
 
 # Create the textbox for simulation results
 power_textbox = tk.Text(root, height=1, width=4)
-power_textbox.pack(side=tk.LEFT)
-Q_textbox = tk.Text(root, height=1, width=4)
-Q_textbox.pack(side=tk.LEFT)
-efficiency_textbox = tk.Text(root, height=1, width=4)
-efficiency_textbox.pack(side=tk.LEFT)
+Label(root, text ="Horsepower").grid(row=0, column=0, padx=30)
+power_textbox.grid(row=1, column = 0, padx = 30)
+Q_textbox = tk.Text(root, height=3, width=12)
+Label(root, text ="Heat Released").grid(row=0, column=1)
+Q_textbox.grid(row = 1, column =1)
+efficiency_textbox = tk.Text(root, height=3, width=12)
+Label(root, text="Efficiency").grid(row=0, column=2)
+efficiency_textbox.grid(row=1, column =2 )
 
 # Create figure object and add plots
 fig = Figure(figsize=(8, 4), dpi=100)
 simulation_plots = [fig.add_subplot(1, 2, i + 1) for i in range(2)]  # Create two subplots
 simulation_canvas = FigureCanvasTkAgg(fig, master=root)
-simulation_canvas.get_tk_widget().pack()
+simulation_canvas.get_tk_widget().grid(row = 0, column=3, columnspan=4, rowspan=5)
 
 
 def setTitles():
@@ -304,13 +307,13 @@ class Meter(Canvas):
 meters = Frame(root, width=width, height=width, bg="white")
 speed = Meter(meters, width=width, height=height)
 speed.draw(min_speed, max_speed, step_speed, "Speed", "KMPH")
-speed.pack(side=LEFT)
-meters.pack(side=LEFT, anchor=SE, fill=Y, expand=True)
+speed.grid(row =6, column=3, )
+meters.grid(row =7, column=3, rowspan= 3)
 meters = Frame(root, width=width, height=width, bg="white")
 rpm = Meter(meters, width=width, height=height)
 rpm.draw(min_rpm, max_rpm, step_rpm, "RPM", "x1000")
-rpm.pack(side=RIGHT)
-meters.pack(anchor=SE, fill=Y, expand=True)
+rpm.grid(row =6, column=4, )
+meters.grid(row =7, column=4, rowspan= 3)
 setTitles()
 
 
@@ -325,13 +328,13 @@ def meter_update():  # funtion that updates the gauges
     root.after(500, meter_update)
 
 
-while True:
-    meter_update()
-    update_simulation()
-    root.update_idletasks()
-    root.update()
-    root.mainloop()
-    time.sleep(1)
+
+meter_update()
+update_simulation()
+root.update_idletasks()
+root.update()
+root.mainloop()
+
 
 
 
