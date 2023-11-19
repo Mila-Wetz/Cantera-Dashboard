@@ -7,6 +7,7 @@ import math
 from tkinter.font import Font
 import time
 import cantera as ct
+from scipy.integrate import trapz
 
 #########################################################################
 # Input Parameters
@@ -23,33 +24,6 @@ V_H = .5e-3  # displaced volume [m**3]
 epsilon = 20.  # compression ratio [-]
 d_piston = 0.083  # piston diameter [m]
 
-# turbocharger temperature, pressure, and composition
-T_inlet = 300.  # K
-p_inlet = 1.3e5  # Pa
-comp_inlet = comp_air
-
-# outlet pressure
-p_outlet = 1.2e5  # Pa
-
-# fuel properties (gaseous!)
-T_injector = 300.  # K
-p_injector = 1600e5  # Pa
-comp_injector = comp_fuel
-
-# ambient properties
-T_ambient = 300.  # K
-p_ambient = 1e5  # Pa
-comp_ambient = comp_air
-
-# Inlet valve friction coefficient, open and close timings
-inlet_valve_coeff = 1.e-6
-inlet_open = -18. / 180. * np.pi
-inlet_close = 198. / 180. * np.pi
-
-# Outlet valve friction coefficient, open and close timings
-outlet_valve_coeff = 1.e-6
-outlet_open = 522. / 180 * np.pi
-outlet_close = 18. / 180. * np.pi
 
 # Simulation time and parameters
 sim_n_revolutions = 2
@@ -78,7 +52,35 @@ def ca_ticks(t):
     return np.round(crank_angle(t) * 180 / np.pi, decimals=1)
 
 
-def simulation(throttle):
+def simulation(throttle, turbo):
+
+    # turbocharger temperature, pressure, and composition
+    T_inlet = 300  # K
+    p_inlet = 1.3e5 + (turbo*1000)  # Pa
+    comp_inlet = comp_air
+
+    # outlet pressure
+    p_outlet = 1.2e5  # Pa
+
+    # fuel properties (gaseous!)
+    T_injector = 300.  # K
+    p_injector = 1600e5  # Pa
+    comp_injector = comp_fuel
+
+    # ambient properties
+    T_ambient = 300.  # K
+    p_ambient = 1e5  # Pa
+    comp_ambient = comp_air
+
+    # Inlet valve friction coefficient, open and close timings
+    inlet_valve_coeff = 1.e-6
+    inlet_open = -18. / 180. * np.pi
+    inlet_close = 198. / 180. * np.pi
+
+    # Outlet valve friction coefficient, open and close timings
+    outlet_valve_coeff = 1.e-6
+    outlet_open = 522. / 180 * np.pi
+    outlet_close = 18. / 180. * np.pi
 
     # load reaction mechanism and begin constructing reactor network
     gas = ct.Solution(reaction_mechanism, phase_name)
@@ -166,13 +168,29 @@ def simulation(throttle):
                       mdot_out=outlet_valve.mass_flow_rate,
                       dWv_dt=dWv_dt)
 
+    # heat release to be plotted and output to GUI
+    Q_text = trapz(states.heat_release_rate * states.V, states.t)
+    Q_textbox.delete(1.0, tk.END)  # Clear previous content
+    Q_textbox.insert(tk.END, Q_text)
+
+    # expansion power to be output to GUI
+    power_text = trapz(states.dWv_dt, states.t)
+    power_textbox.delete(1.0, tk.END)  # Clear previous content
+    power_textbox.insert(tk.END, power_text)
+
+    # efficiency
+    efficiency_text = power_text / Q_text
+    efficiency_textbox.delete(1.0, tk.END)  # Clear previous content
+    efficiency_textbox.insert(tk.END, efficiency_text)
+
     return states
 
 
 def update_simulation():
     gearshift = gearshift_slider.get()
     throttle = throttle_slider.get()
-    states = simulation(throttle)
+    turbo = turbo_slider.get()
+    states = simulation(throttle, turbo)
     simulation_plots[0].clear()  # Clear first subplot
     simulation_plots[0].plot(states.ca, states.P)  # Plot on first subplot
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
@@ -196,13 +214,24 @@ step_rpm = 1  # Least count or smallest division on the dial which has a text va
 root = tk.Tk()
 root.title("Real-Time Diesel Engine Simulation")
 meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in the meter. Feel free to play around.
-temp = [5, 7, 9, 2, 3]
 
+# Create the slider objects and position
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=10, orient="vertical")
 gearshift_slider.pack(side=tk.LEFT)
 throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
 throttle_slider.pack(side=tk.LEFT)
+turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
+turbo_slider.pack(side=tk.LEFT)
 
+# Create the textbox for simulation results
+power_textbox = tk.Text(root, height=1, width=4)
+power_textbox.pack(side=tk.LEFT)
+Q_textbox = tk.Text(root, height=1, width=4)
+Q_textbox.pack(side=tk.LEFT)
+efficiency_textbox = tk.Text(root, height=1, width=4)
+efficiency_textbox.pack(side=tk.LEFT)
+
+# Create figure object and add plots
 fig = Figure(figsize=(8, 4), dpi=100)
 simulation_plots = [fig.add_subplot(1, 2, i + 1) for i in range(2)]  # Create two subplots
 simulation_canvas = FigureCanvasTkAgg(fig, master=root)
@@ -301,7 +330,7 @@ def meter_update():  # funtion that updates the gauges
 
     Speed_throttle = throttle_slider.get()
     Speed_Gearshift = gearshift_slider.get()
-    kmph = Engine_Speed * Speed_throttle * (11/12) / 4
+    kmph = Engine_Speed * Speed_throttle / 4
     rev = Engine_Speed * Speed_Gearshift / 10
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
