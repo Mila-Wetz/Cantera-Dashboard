@@ -43,6 +43,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import math
+import random
+import time
 from tkinter.font import Font
 import tkinter.filedialog
 import tkinter.messagebox
@@ -190,8 +192,11 @@ states = ct.SolutionArray(cyl.thermo, extra=('t', 'ca', 'V', 'm', 'mdot_in', 'md
 
 
 def simulation(throttle):
-    
-    
+    sim = ct.ReactorNet([cyl])
+    sim.rtol, sim.atol = rtol, atol
+    cyl.set_advance_limit('temperature', delta_T_max)
+    throttle = throttle_slider.get()
+    print('throttle = ', throttle)
     # Fuel mass, injector open and close timings
     injector_open = 350. / 180. * np.pi
     injector_close = 365. / 180. * np.pi
@@ -208,6 +213,8 @@ def simulation(throttle):
     # simulate with a maximum resolution of 2 deg crank angle
     dt = 2 / (360 * f)
     t_stop = sim_n_revolutions / f
+    #sim.setInitialTime(0)
+    #sim.advance(0)
     while sim.time < t_stop:
         # perform time integration
         sim.advance(sim.time + dt)
@@ -224,78 +231,35 @@ def simulation(throttle):
                       mdot_out=outlet_valve.mass_flow_rate,
                       dWv_dt=dWv_dt)
         
-        
+
     return states
 
 
 
+#####################################################################
+# GUI
+#####################################################################
 
 
-
-# t = states.t
-
-# # p-V diagram
-# states = simulation(throttle=1)
-
-# fig, ax = plt.subplots()
-# ax.plot(states.ca, states.P)
-# #ax.plot(states.V[t > 0.04] * 1000, states.P[t > 0.04] / 1.e5)
-# ax.set_xlabel('$V$ [l]')
-# ax.set_ylabel('$p$ [bar]')
-# plt.show()
-
-
-
-
-
-
-
-# Replace 'file_path.xlsx' with the path to your Excel file
-file_path = 'ExampleOutputData.xlsx'
-
-# Read the Excel file
-excel_data = pd.read_excel(file_path)
-
-# Store each column as a list
-data = {}
-for column in excel_data.columns:
-    data[column] = excel_data[column].tolist()
-
-# Access the lists by column name
-# For example, to access the list of values in the 'Column_name' column:
-# column_list = columns_as_lists['Column_name']
-
-c_angle = data['CAD']
-vol = data['Vol']
-press = data['Pressure']
-
-
-#throttle = 8
-
-
-
-
+#throt =[]
 def update_sine_wave():
-    #gearshift = gearshift_slider.get()
     throttle = throttle_slider.get()
-    #x = np.linspace(0, 2 * np.pi, 100)
-    #y = gearshift * np.sin(throttle * x)
-    
-    
-    
+    #throt.append(throttle)
+    #if throt[-1] != throt[-2]:
     states = simulation(throttle)
-    
+    print(states.P)
     sine_wave_plots[0].clear()  # Clear first subplot
     #sine_wave_plots[0].plot(c_angle,press) # Plot on first subplot
     sine_wave_plots[0].plot(states.ca,states.P) # Plot on first subplot
     sine_wave_plots[0].set_title('P vs crank angle')
-    
+
     sine_wave_plots[1].clear()  # Clear second subplot
     sine_wave_plots[1].plot(states.V,states.P)  # Plot on second subplot
     #sine_wave_plots[1].plot(vol,press)  # Plot on second subplot
     sine_wave_plots[1].set_title('P vs V')
     sine_wave_canvas.draw()
-    root.after(100, update_sine_wave)  # Update every 100ms
+    root.after(500, update_sine_wave)  # Update every 1000ms
+    print('plot updated')
 
 width,height = 400,400 #Dimensions of the canvas.
 len1,len2 = 0.85,0.3 #Dimensions of the needle, relative to the canvas ray.
@@ -307,14 +271,13 @@ min_rpm,max_rpm = 0,8 #Max and min values on the dial. Adjust according to need.
 step_rpm = 1 #Least count or smallest division on the dial which has a text value displayed. Adjust according to need.
 
 root = tk.Tk()
-root.title("Real-Time Sine Wave Simulation")
+root.title("Real-Time Simulation")
 meter_font = Font(family="Tahoma",size=12,weight='normal')#The font used in the meter. Feel free to play around.
-temp= [5,7,9,2,3]
 
-
+t_values= list(np.arange(0.1,2.5,0.1))
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=10, orient="vertical")
 gearshift_slider.pack(side=tk.LEFT)
-throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
+throttle_slider = tk.Scale(root, label="Throttle", from_=min(t_values), to=max(t_values), resolution = 0.1, orient="vertical")
 throttle_slider.pack(side=tk.LEFT)
 
 
@@ -415,8 +378,6 @@ y=Message(cRpm, width = 100,text='')
 y.place(x=0,y=0)
 y.pack()
 
-
-
 def meter_update(): #funtion that updates the gauges
     i=0
     s = []
@@ -432,35 +393,16 @@ def meter_update(): #funtion that updates the gauges
     rpm.draw_needle(rev)
     x.config(text=kmph)
     y.config(text=rev)
-    root.after(500, meter_update)
-    
-
-i=0
-while True:
-   s = []
-   r = []
-   for i in range(0,1000):
-       a= random.randint(1,8)
-       s.append(a)
-       n = random.randint(1,200)
-       r.append(n)
-   kmph=int(r[i])
-   rev=int(s[i])
-   speed.draw_needle(kmph)
-   rpm.draw_needle(rev)
-   x.config(text=kmph)
-   y.config(text=rev)
-   update_sine_wave()
-   root.update_idletasks()
-   root.update()
-   root.after(500, meter_update)
-   root.mainloop()
-   time.sleep(1)
-   i+=1
+    root.after(500,meter_update)
+    print('meter updated')
 
 
 
-
+update_sine_wave()
+meter_update()
+#root.update_idletasks()
+#root.update()
+root.mainloop()
 
 
 
