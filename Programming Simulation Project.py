@@ -313,18 +313,6 @@ rpm.pack(side=RIGHT)
 meters.pack(anchor=SE, fill=Y, expand=True)
 setTitles()
 
-# Digital value zone.
-cSpeed = Canvas(root, width=30, height=30, bg="white")
-cSpeed.place(x=width * 0.5, y=0.6 * height)
-x = Message(cSpeed, width=100, text='')
-x.place(x=0, y=0)
-x.pack()
-cRpm = Canvas(root, width=30, height=30, bg="white")
-cRpm.place(x=1.5 * width, y=0.6 * height)
-y = Message(cRpm, width=100, text='')
-y.place(x=0, y=0)
-y.pack()
-
 
 def meter_update():  # funtion that updates the gauges
 
@@ -334,8 +322,6 @@ def meter_update():  # funtion that updates the gauges
     rev = Engine_Speed * Speed_Gearshift / 10
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
-    x.config(text=kmph)
-    y.config(text=rev)
     root.after(500, meter_update)
 
 
