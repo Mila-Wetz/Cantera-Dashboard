@@ -195,9 +195,10 @@ def update_simulation():
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
     simulation_plots[0].set_xlabel('Crank Angle (degrees)')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
-    simulation_plots[0].set_ylim(0, 20000000)
+    simulation_plots[0].set_ylim(0, 20000)
     simulation_plots[0].set_xlim(0, 13)
-    simulation_plots[0].plot(states.ca, states.P)
+    simulation_plots[0].plot(states.ca, states.P/1000)
+    # simulation_plots[0].plot(states.ca, states.heat_release_rate/1000000)
     simulation_plots[1].clear()  # Clear second subplot
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
     simulation_plots[1].set_xlabel('Volume (L)')
@@ -227,7 +228,7 @@ throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="verti
 throttle_slider.grid(row=5, column=1, rowspan=3)
 turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
 turbo_slider.grid(row=5, column=2, rowspan=3)
-injection_time_slider = tk.Scale(root, label="Adjust Injection Timing", from_=-10, to=10, orient="vertical")
+injection_time_slider = tk.Scale(root, label="Adjust Injection Timing", from_=-5, to=5, orient="vertical")
 injection_time_slider.grid(row=2, column=0, rowspan=2)
 
 # Create the textbox for simulation results
@@ -235,7 +236,7 @@ power_textbox = tk.Text(root, height=1, width=4)
 Label(root, text="Horsepower").grid(row=0, column=0, padx=30)
 power_textbox.grid(row=1, column=0, padx=30)
 Q_textbox = tk.Text(root, height=3, width=12)
-Label(root, text="Heat Released").grid(row=0, column=1)
+Label(root, text="Adiabatic Heat Release").grid(row=0, column=1)
 Q_textbox.grid(row=1, column=1)
 efficiency_textbox = tk.Text(root, height=3, width=12)
 Label(root, text="Efficiency").grid(row=0, column=2)
@@ -325,7 +326,6 @@ setTitles()
 
 
 def meter_update():  # funtion that updates the gauges
-
     Speed_throttle = throttle_slider.get()
     Speed_Gearshift = gearshift_slider.get()
     kmph = Engine_Speed * Speed_throttle / 4
