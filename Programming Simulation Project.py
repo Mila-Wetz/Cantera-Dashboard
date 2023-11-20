@@ -52,7 +52,7 @@ def ca_ticks(t):
     return np.round(crank_angle(t) * 180 / np.pi, decimals=1)
 
 
-def simulation(throttle, turbo):
+def simulation(throttle, turbo, injectiontime):
 
     # turbocharger temperature, pressure, and composition
     T_inlet = 300  # K
@@ -131,8 +131,8 @@ def simulation(throttle, turbo):
     cyl.set_advance_limit('temperature', delta_T_max)
 
     # Fuel mass, injector open and close timings
-    injector_open = 350. / 180. * np.pi
-    injector_close = 365. / 180. * np.pi
+    injector_open = (350 - injectiontime) / 180. * np.pi
+    injector_close = (365 - injectiontime) / 180. * np.pi
     injector_mass = 1.5e-5 + (throttle * .1 * 1.5e-5)   # kg
 
     # injector is modeled as a mass flow controller
@@ -157,8 +157,7 @@ def simulation(throttle, turbo):
         sim.advance(sim.time + dt)
 
         # calculate results to be stored
-        dWv_dt = - (cyl.thermo.P - ambient_air.thermo.P) * A_piston * \
-                 piston_speed(sim.time)
+        dWv_dt = - (cyl.thermo.P - ambient_air.thermo.P) * A_piston * piston_speed(sim.time)
 
         # append output data
         states.append(cyl.thermo.state,
@@ -189,22 +188,20 @@ def simulation(throttle, turbo):
 def update_simulation():
     gearshift = gearshift_slider.get()
     throttle = throttle_slider.get()
+    injectiontime = injection_time_slider.get()
     turbo = turbo_slider.get()
-    states = simulation(throttle, turbo)
+    states = simulation(throttle, turbo, injectiontime)
     simulation_plots[0].clear()  # Clear first subplot
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
     simulation_plots[0].set_xlabel('Crank Angle (degrees)')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
-    simulation_plots[0].set_ylim(0,20000000)
-    simulation_plots[0].set_xlim(0,13)
+    simulation_plots[0].set_ylim(0, 20000000)
+    simulation_plots[0].set_xlim(0, 13)
     simulation_plots[0].plot(states.ca, states.P)
-
     simulation_plots[1].clear()  # Clear second subplot
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
     simulation_plots[1].set_xlabel('Volume (L)')
-    #simulation_plots[1].set_ylabel('Cylinder Pressure (kPa)')
     simulation_plots[1].set_ylim(0, 20000000)
-    #simulation_plots[1].set_xlim(0, 0.000006)
     simulation_plots[1].plot(states.V, states.P)
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
@@ -225,28 +222,30 @@ meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in
 
 # Create the slider objects and position
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=10, orient="vertical")
-gearshift_slider.grid(row=5,column=0, rowspan = 3)
+gearshift_slider.grid(row=5, column=0, rowspan=3)
 throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
-throttle_slider.grid(row=5,column=1, rowspan = 3)
+throttle_slider.grid(row=5, column=1, rowspan=3)
 turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
-turbo_slider.grid(row =5, column=2, rowspan= 3)
+turbo_slider.grid(row=5, column=2, rowspan=3)
+injection_time_slider = tk.Scale(root, label="Adjust Injection Timing", from_=-10, to=10, orient="vertical")
+injection_time_slider.grid(row=2, column=0, rowspan=2)
 
 # Create the textbox for simulation results
 power_textbox = tk.Text(root, height=1, width=4)
-Label(root, text ="Horsepower").grid(row=0, column=0, padx=30)
-power_textbox.grid(row=1, column = 0, padx = 30)
+Label(root, text="Horsepower").grid(row=0, column=0, padx=30)
+power_textbox.grid(row=1, column=0, padx=30)
 Q_textbox = tk.Text(root, height=3, width=12)
-Label(root, text ="Heat Released").grid(row=0, column=1)
-Q_textbox.grid(row = 1, column =1)
+Label(root, text="Heat Released").grid(row=0, column=1)
+Q_textbox.grid(row=1, column=1)
 efficiency_textbox = tk.Text(root, height=3, width=12)
 Label(root, text="Efficiency").grid(row=0, column=2)
-efficiency_textbox.grid(row=1, column =2 )
+efficiency_textbox.grid(row=1, column=2)
 
 # Create figure object and add plots
 fig = Figure(figsize=(8, 4), dpi=100)
 simulation_plots = [fig.add_subplot(1, 2, i + 1) for i in range(2)]  # Create two subplots
 simulation_canvas = FigureCanvasTkAgg(fig, master=root)
-simulation_canvas.get_tk_widget().grid(row = 0, column=3, columnspan=4, rowspan=5)
+simulation_canvas.get_tk_widget().grid(row=0, column=3, columnspan=4, rowspan=5)
 
 
 def setTitles():
@@ -315,13 +314,13 @@ class Meter(Canvas):
 meters = Frame(root, width=width, height=width, bg="white")
 speed = Meter(meters, width=width, height=height)
 speed.draw(min_speed, max_speed, step_speed, "Speed", "KMPH")
-speed.grid(row =6, column=3, )
-meters.grid(row =7, column=3, rowspan= 3)
+speed.grid(row=6, column=3, )
+meters.grid(row=7, column=3, rowspan=3)
 meters = Frame(root, width=width, height=width, bg="white")
 rpm = Meter(meters, width=width, height=height)
 rpm.draw(min_rpm, max_rpm, step_rpm, "RPM", "x1000")
-rpm.grid(row =6, column=4, )
-meters.grid(row =7, column=4, rowspan= 3)
+rpm.grid(row=6, column=4, )
+meters.grid(row=7, column=4, rowspan=3)
 setTitles()
 
 
@@ -336,13 +335,11 @@ def meter_update():  # funtion that updates the gauges
     root.after(500, meter_update)
 
 
-
 meter_update()
 update_simulation()
 root.update_idletasks()
 root.update()
 root.mainloop()
-
 
 
 
