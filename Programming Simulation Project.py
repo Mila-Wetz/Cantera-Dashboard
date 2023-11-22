@@ -52,7 +52,7 @@ def ca_ticks(t):
     return np.round(crank_angle(t) * 180 / np.pi, decimals=1)
 
 
-def simulation(throttle, turbo, injectiontime):
+def simulation(throttle, turbo, injection_time, AFR_adjustment):
 
     # turbocharger temperature, pressure, and composition
     T_inlet = 300  # K
@@ -73,7 +73,7 @@ def simulation(throttle, turbo, injectiontime):
     comp_ambient = comp_air
 
     # Inlet valve friction coefficient, open and close timings
-    inlet_valve_coeff = 1.e-6
+    inlet_valve_coeff = 1.e-6 + (AFR_adjustment * 1.e-6)
     inlet_open = -18. / 180. * np.pi
     inlet_close = 198. / 180. * np.pi
 
@@ -131,8 +131,8 @@ def simulation(throttle, turbo, injectiontime):
     cyl.set_advance_limit('temperature', delta_T_max)
 
     # Fuel mass, injector open and close timings
-    injector_open = (350 - injectiontime) / 180. * np.pi
-    injector_close = (365 - injectiontime) / 180. * np.pi
+    injector_open = (350 - injection_time) / 180. * np.pi
+    injector_close = (365 - injection_time) / 180. * np.pi
     injector_mass = 1.5e-5 + (throttle * .1 * 1.5e-5)   # kg
 
     # injector is modeled as a mass flow controller
@@ -148,7 +148,7 @@ def simulation(throttle, turbo, injectiontime):
                                                  'dWv_dt'), )
 
     # Simulate with a maximum resolution of 2 deg crank angle
-    dt = 2 / (360 * Engine_Speed)
+    dt = 1 / (360 * Engine_Speed)
     t_stop = sim_n_revolutions / Engine_Speed
 
     # Perform simulation
@@ -170,7 +170,7 @@ def simulation(throttle, turbo, injectiontime):
     # heat release to be plotted and output to GUI
     Q_text = trapz(states.heat_release_rate * states.V, states.t)
     Q_textbox.delete(1.0, tk.END)  # Clear previous content
-    Q_textbox.insert(tk.END, Q_text)
+    Q_textbox.insert(tk.END, "{:.3f}".format(Q_text))
 
     # expansion power to be output to GUI
     power_text = trapz(states.dWv_dt, states.t)
@@ -180,34 +180,47 @@ def simulation(throttle, turbo, injectiontime):
     # efficiency
     efficiency_text = power_text / Q_text
     efficiency_textbox.delete(1.0, tk.END)  # Clear previous content
-    efficiency_textbox.insert(tk.END, efficiency_text)
+    efficiency_textbox.insert(tk.END, "{:.2f}".format(efficiency_text*100))
+
+    # AFR to be output to GUI
+    total_mdot_in = trapz(states.mdot_in, states.t)
+    AFR_text = total_mdot_in / injector_mass
+    AFR_textbox.delete(1.0, tk.END)  # Clear previous content
+    AFR_textbox.insert(tk.END, "{:.2f}".format(AFR_text))
 
     return states
 
 
 def update_simulation():
-    gearshift = gearshift_slider.get()
+
+    # Assign values from GUI to perform simulation
     throttle = throttle_slider.get()
-    injectiontime = injection_time_slider.get()
+    injection_time = injection_time_slider.get()
     turbo = turbo_slider.get()
-    states = simulation(throttle, turbo, injectiontime)
+    AFR_adjustment = AFR_slider.get()
+    states = simulation(throttle, turbo, injection_time, AFR_adjustment)
+
+    # plot crank angle vs pressure
+    xticks = np.arange(0, 0.18, 0.02)
     simulation_plots[0].clear()  # Clear first subplot
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
-    simulation_plots[0].set_xlabel('Crank Angle (degrees)')
+    simulation_plots[0].set_xlabel(r'$\phi$ [deg]')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
     simulation_plots[0].set_ylim(0, 20000)
-    simulation_plots[0].set_xlim(0, 13)
-    simulation_plots[0].plot(states.ca, states.P/1000)
-    # simulation_plots[0].plot(states.ca, states.heat_release_rate/1000000)
+    simulation_plots[0].set_xticklabels(ca_ticks(xticks))
+    simulation_plots[0].plot(states.t, states.P/1000)
+
+    # plot volume vs pressure
     simulation_plots[1].clear()  # Clear second subplot
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
-    simulation_plots[1].set_xlabel('Volume (L)')
-    simulation_plots[1].set_ylim(0, 20000000)
-    simulation_plots[1].plot(states.V, states.P)
+    simulation_plots[1].set_xlabel(r'Volume ($\times 10^{-4}$ L)')
+    simulation_plots[1].set_ylim(0, 20000)
+    simulation_plots[1].plot(states.V*10000, states.P/1000)
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
 
 
+# Define properties for gauges
 width, height = 400, 400  # Dimensions of the canvas.
 len1, len2 = 0.85, 0.3  # Dimensions of the needle, relative to the canvas ray.
 ray = int(0.7 * width / 2)  # Radius of the dial.
@@ -221,26 +234,41 @@ root = tk.Tk()
 root.title("Real-Time Diesel Engine Simulation")
 meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in the meter. Feel free to play around.
 
-# Create the slider objects and position
-gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=10, orient="vertical")
-gearshift_slider.grid(row=5, column=0, rowspan=3)
+# Create throttle slider
 throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
-throttle_slider.grid(row=5, column=1, rowspan=3)
-turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
-turbo_slider.grid(row=5, column=2, rowspan=3)
-injection_time_slider = tk.Scale(root, label="Adjust Injection Timing", from_=-5, to=5, orient="vertical")
-injection_time_slider.grid(row=2, column=0, rowspan=2)
+throttle_slider.grid(row=5, column=1, rowspan=2)
 
-# Create the textbox for simulation results
+# Create turbo slider
+turbo_slider = tk.Scale(root, label="Turbo Boost Pressure", from_=1, to=10, orient="vertical")
+turbo_slider.grid(row=5, column=2, rowspan=2)
+
+# Create injection time slider
+injection_time_slider = tk.Scale(root, label="Adjust Injection Timing", from_=-5, to=5, orient="vertical")
+injection_time_slider.grid(row=5, column=0, rowspan=2)
+
+# Create AFR Slider
+AFR_slider = tk.Scale(root, label="Adjust Air to Fuel Ratio", from_=0, to=10, orient="vertical")
+AFR_slider.grid(row=7, column=0, rowspan=2)
+
+# Create power textbox for simulation results
 power_textbox = tk.Text(root, height=1, width=4)
 Label(root, text="Horsepower").grid(row=0, column=0, padx=30)
 power_textbox.grid(row=1, column=0, padx=30)
-Q_textbox = tk.Text(root, height=3, width=12)
+
+# Create heat release textbox for simulation results
+Q_textbox = tk.Text(root, height=1, width=12)
 Label(root, text="Adiabatic Heat Release").grid(row=0, column=1)
 Q_textbox.grid(row=1, column=1)
-efficiency_textbox = tk.Text(root, height=3, width=12)
+
+# Create efficiency textbox for simulation results
+efficiency_textbox = tk.Text(root, height=1, width=12)
 Label(root, text="Efficiency").grid(row=0, column=2)
 efficiency_textbox.grid(row=1, column=2)
+
+# Create AFR textbox for simulation results
+AFR_textbox = tk.Text(root, height=1, width=12)
+Label(root, text="Air-Fuel Ratio").grid(row=2, column=0)
+AFR_textbox.grid(row=3, column=0)
 
 # Create figure object and add plots
 fig = Figure(figsize=(8, 4), dpi=100)
@@ -315,21 +343,20 @@ class Meter(Canvas):
 meters = Frame(root, width=width, height=width, bg="white")
 speed = Meter(meters, width=width, height=height)
 speed.draw(min_speed, max_speed, step_speed, "Speed", "KMPH")
-speed.grid(row=6, column=3, )
-meters.grid(row=7, column=3, rowspan=3)
+speed.grid(row=5, column=3, )
+meters.grid(row=6, column=3, rowspan=3)
 meters = Frame(root, width=width, height=width, bg="white")
 rpm = Meter(meters, width=width, height=height)
 rpm.draw(min_rpm, max_rpm, step_rpm, "RPM", "x1000")
-rpm.grid(row=6, column=4, )
-meters.grid(row=7, column=4, rowspan=3)
+rpm.grid(row=5, column=4, )
+meters.grid(row=6, column=4, rowspan=3)
 setTitles()
 
 
 def meter_update():  # funtion that updates the gauges
     Speed_throttle = throttle_slider.get()
-    Speed_Gearshift = gearshift_slider.get()
     kmph = Engine_Speed * Speed_throttle / 4
-    rev = Engine_Speed * Speed_Gearshift / 10
+    rev = Engine_Speed * 5 / 10
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
     root.after(500, meter_update)
@@ -340,6 +367,5 @@ update_simulation()
 root.update_idletasks()
 root.update()
 root.mainloop()
-
 
 
