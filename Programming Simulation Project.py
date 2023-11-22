@@ -5,54 +5,40 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import math
 from tkinter.font import Font
-import time
 import cantera as ct
 from scipy.integrate import trapz
 
-#########################################################################
-# Input Parameters
-#########################################################################
-
-# reaction mechanism, kinetics type and compositions
-reaction_mechanism = 'nDodecane_Reitz.yaml'
-phase_name = 'nDodecane_IG'
-comp_air = 'o2:1, n2:3.76'
-comp_fuel = 'c12h26:1'
-
-Engine_Speed = 3000. / 60.  # engine speed [1/s] (3000 rpm)
-V_H = .5e-3  # displaced volume [m**3]
-epsilon = 20.  # compression ratio [-]
+# IC Parameters
 d_piston = 0.083  # piston diameter [m]
-
-
-# Simulation time and parameters
-sim_n_revolutions = 2
-delta_T_max = 20.
-rtol = 1.e-12
-atol = 1.e-16
-
-# Additional IC Parameters
+epsilon = 20.  # compression ratio [-]
+V_H = .5e-3  # displaced volume [m**3]
 V_oT = V_H / (epsilon - 1.)
 A_piston = .25 * np.pi * d_piston ** 2
 stroke = V_H / A_piston
 
 
-def crank_angle(t):
-    """Convert time to crank angle"""
-    return np.remainder(2 * np.pi * Engine_Speed * t, 4 * np.pi)
+def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
 
+    def crank_angle(t):
+        """Convert time to crank angle"""
+        return np.remainder(2 * np.pi * Engine_Speed * t, 4 * np.pi)
 
-def piston_speed(t):
-    """Approximate piston speed with sinusoidal velocity profile"""
-    return - stroke / 2 * 2 * np.pi * Engine_Speed * np.sin(crank_angle(t))
+    def piston_speed(t):
+        """Approximate piston speed with sinusoidal velocity profile"""
+        return - stroke / 2 * 2 * np.pi * Engine_Speed * np.sin(crank_angle(t))
 
+    # reaction mechanism, kinetics type and compositions
+    reaction_mechanism = 'nDodecane_Reitz.yaml'
+    phase_name = 'nDodecane_IG'
+    comp_air = 'o2:1, n2:3.76'
+    comp_fuel = 'c12h26:1'
 
-def ca_ticks(t):
-    """Helper function converts time to rounded crank angle."""
-    return np.round(crank_angle(t) * 180 / np.pi, decimals=1)
-
-
-def simulation(throttle, turbo, injection_time, AFR_adjustment):
+    # Simulation time and parameters
+    Engine_Speed = (1000. / 60.) * Gearshift  # engine speed [1/s] (3000 rpm)
+    sim_n_revolutions = 2
+    delta_T_max = 20.
+    rtol = 1.e-12
+    atol = 1.e-16
 
     # turbocharger temperature, pressure, and composition
     T_inlet = 300  # K
@@ -193,22 +179,27 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment):
 
 def update_simulation():
 
+    def crank_angle(t):
+        """Convert time to crank angle"""
+        return np.remainder(2 * np.pi * Engine_Speed * t, 4 * np.pi)
+
+
     # Assign values from GUI to perform simulation
     throttle = throttle_slider.get()
     injection_time = injection_time_slider.get()
     turbo = turbo_slider.get()
     AFR_adjustment = AFR_slider.get()
-    states = simulation(throttle, turbo, injection_time, AFR_adjustment)
+    Gearshift = gearshift_slider.get()
+    Engine_Speed = (1000. / 60.) * Gearshift  # engine speed [1/s]
+    states = simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift)
 
     # plot crank angle vs pressure
-    xticks = np.arange(0, 0.18, 0.02)
     simulation_plots[0].clear()  # Clear first subplot
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
     simulation_plots[0].set_xlabel(r'$\phi$ [deg]')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
     simulation_plots[0].set_ylim(0, 25000)
-    simulation_plots[0].set_xticklabels(ca_ticks(xticks))
-    simulation_plots[0].plot(states.t, states.P/1000)
+    simulation_plots[0].plot(crank_angle(states.t)*57.6, states.P/1000)
 
     # plot volume vs pressure
     simulation_plots[1].clear()  # Clear second subplot
@@ -233,6 +224,10 @@ step_rpm = 1  # Least count or smallest division on the dial which has a text va
 root = tk.Tk()
 root.title("Real-Time Diesel Engine Simulation")
 meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in the meter. Feel free to play around.
+
+# Create engine speed slider
+gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=8, orient="vertical")
+gearshift_slider.grid(row=7, column=1, rowspan=2)
 
 # Create throttle slider
 throttle_slider = tk.Scale(root, label="Throttle", from_=1, to=10, orient="vertical")
@@ -355,8 +350,8 @@ setTitles()
 
 def meter_update():  # funtion that updates the gauges
     Speed_throttle = throttle_slider.get()
-    kmph = Engine_Speed * Speed_throttle / 4
-    rev = Engine_Speed * 5 / 10
+    kmph = Speed_throttle * 15.5
+    rev = gearshift_slider.get()
     speed.draw_needle(kmph)
     rpm.draw_needle(rev)
     root.after(500, meter_update)
