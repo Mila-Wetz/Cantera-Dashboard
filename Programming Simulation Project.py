@@ -170,7 +170,7 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment):
     # heat release to be plotted and output to GUI
     Q_text = trapz(states.heat_release_rate * states.V, states.t)
     Q_textbox.delete(1.0, tk.END)  # Clear previous content
-    Q_textbox.insert(tk.END, "{:.3f}".format(Q_text))
+    Q_textbox.insert(tk.END, "{:.2f}".format(Q_text))
 
     # expansion power to be output to GUI
     power_text = trapz(states.dWv_dt, states.t)
@@ -206,7 +206,7 @@ def update_simulation():
     simulation_plots[0].set_title('Cylinder Pressure vs Crank Angle Degree')
     simulation_plots[0].set_xlabel(r'$\phi$ [deg]')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
-    simulation_plots[0].set_ylim(0, 20000)
+    simulation_plots[0].set_ylim(0, 25000)
     simulation_plots[0].set_xticklabels(ca_ticks(xticks))
     simulation_plots[0].plot(states.t, states.P/1000)
 
@@ -214,7 +214,7 @@ def update_simulation():
     simulation_plots[1].clear()  # Clear second subplot
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
     simulation_plots[1].set_xlabel(r'Volume ($\times 10^{-4}$ L)')
-    simulation_plots[1].set_ylim(0, 20000)
+    simulation_plots[1].set_ylim(0, 25000)
     simulation_plots[1].plot(states.V*10000, states.P/1000)
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
@@ -367,5 +367,4 @@ update_simulation()
 root.update_idletasks()
 root.update()
 root.mainloop()
-
 
