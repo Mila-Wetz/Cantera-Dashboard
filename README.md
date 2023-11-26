@@ -13,6 +13,7 @@ The simulation continuously updates as the slider values are changed to increase
 ![simsliders](https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/fe6fec8e-298a-472a-9623-52229cc4a56d)
 
 The code then uses the user input data from the sliders to simulate the engine with those parameters. It then plots the changes in cylinder pressure vs crank angle and volume and calculate engine performance factors such as:
+
   -Horsepower
   -Adiabatic Heat Release
   -Efficiency
