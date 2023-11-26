@@ -15,5 +15,7 @@ The code then uses the user input data from the sliders to simulate the engine w
   -Adiabatic Heat Release
   -Efficiency
   -Air-to-Fuel Ratio
-  
+  ![simplots](https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/95dd7daf-61f3-497b-9ab1-ab9a86a186cf)
+![simoutput](https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/393de426-9334-4ba1-a522-d0ed805c8904)
+
 
