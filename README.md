@@ -23,3 +23,4 @@ The code then uses the user input data from the sliders to simulate the engine w
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/393de426-9334-4ba1-a522-d0ed805c8904) width="500" height="400">
 
 
+Simply run the file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs.
