@@ -167,7 +167,13 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
     efficiency_text = power_text / Q_text
     efficiency_textbox.delete(1.0, tk.END)  # Clear previous content
     efficiency_textbox.insert(tk.END, "{:.2f}".format(efficiency_text*100))
-
+    #warnings
+    if power_text < 100:
+        warning_text = "No combustion possible, increase fuel injection with throttle or amount of air injection"
+    else: warning_text = "No warnings"
+    error_textbox.delete(1.0, tk.END)
+    error_textbox.insert(tk.END, warning_text)
+    
     # AFR to be output to GUI
     total_mdot_in = trapz(states.mdot_in, states.t)
     AFR_text = total_mdot_in / injector_mass
@@ -266,6 +272,11 @@ efficiency_textbox.grid(row=1, column=2)
 AFR_textbox = tk.Text(root, height=1, width=12)
 Label(root, text="Air-Fuel Ratio").grid(row=2, column=0)
 AFR_textbox.grid(row=3, column=0)
+
+#Warning textbox
+error_textbox = tk.Text(root, height= 4, width=24)
+Label(root, text="Warning").grid(row=2, column=1)
+error_textbox.grid(row=3, column=1)
 
 # Create figure object and add plots
 fig = Figure(figsize=(8, 4), dpi=100)
