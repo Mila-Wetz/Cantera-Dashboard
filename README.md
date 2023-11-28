@@ -7,7 +7,7 @@ The simulation continuously updates as the slider values are changed to increase
 
   -Injection timing
   -Air to fuel ratio
-  -Pressure
+  -Air Intake Pressure
   -Throttle levels
 
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/fe6fec8e-298a-472a-9623-52229cc4a56d width ="500" height="400">
