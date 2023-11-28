@@ -274,7 +274,7 @@ Label(root, text="Air-Fuel Ratio").grid(row=2, column=0)
 AFR_textbox.grid(row=3, column=0)
 
 #Warning textbox
-error_textbox = tk.Text(root, height= 4, width=24)
+error_textbox = tk.Text(root, height= 4, width=32)
 Label(root, text="Warning").grid(row=2, column=1)
 error_textbox.grid(row=3, column=1)
 
