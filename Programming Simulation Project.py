@@ -216,14 +216,14 @@ width, height = 400, 400  # Dimensions of the canvas.
 len1, len2 = 0.85, 0.3  # Dimensions of the needle, relative to the canvas ray.
 ray = int(0.7 * width / 2)  # Radius of the dial.
 x0, y0 = width / 2, width / 2  # Position of the center of the circle.
-min_speed, max_speed = 0, 220  # Max and min values on the dial. Adjust according to need.
+min_speed, max_speed = 0, 220  # Max and min values on the dial. 
 step_speed = 20  # Least count or smallest division on the dial which has a text value displayed.
-min_rpm, max_rpm = 0, 8  # Max and min values on the dial. Adjust according to need.
-step_rpm = 1  # Least count or smallest division on the dial which has a text value displayed. Adjust according to need.
+min_rpm, max_rpm = 0, 8  # Max and min values on the dial. 
+step_rpm = 1  # Least count or smallest division on the dial which has a text value displayed. 
 
 root = tk.Tk()
 root.title("Real-Time Diesel Engine Simulation")
-meter_font = Font(family="Tahoma", size=12, weight='normal')  # The font used in the meter. Feel free to play around.
+meter_font = Font(family="Tahoma", size=12, weight='normal') 
 
 # Create engine speed slider
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=8, orient="vertical")
