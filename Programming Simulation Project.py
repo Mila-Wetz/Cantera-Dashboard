@@ -200,6 +200,7 @@ def update_simulation():
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
     simulation_plots[0].set_ylim(0, 25000)
     simulation_plots[0].plot(crank_angle(states.t)*57.6, states.P/1000)
+    simulation_plots[0].grid()
 
     # plot volume vs pressure
     simulation_plots[1].clear()  # Clear second subplot
@@ -207,6 +208,7 @@ def update_simulation():
     simulation_plots[1].set_xlabel(r'Volume ($\times 10^{-4}$ L)')
     simulation_plots[1].set_ylim(0, 25000)
     simulation_plots[1].plot(states.V*10000, states.P/1000)
+    simulation_plots[1].grid()
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
 
@@ -247,12 +249,12 @@ AFR_slider.grid(row=7, column=0, rowspan=2)
 
 # Create power textbox for simulation results
 power_textbox = tk.Text(root, height=1, width=4)
-Label(root, text="Horsepower").grid(row=0, column=0, padx=30)
+Label(root, text="Power, kilowatts").grid(row=0, column=0, padx=30)
 power_textbox.grid(row=1, column=0, padx=30)
 
 # Create heat release textbox for simulation results
 Q_textbox = tk.Text(root, height=1, width=12)
-Label(root, text="Adiabatic Heat Release").grid(row=0, column=1)
+Label(root, text="Adiabatic Heat Release, kJ/cycle").grid(row=0, column=1)
 Q_textbox.grid(row=1, column=1)
 
 # Create efficiency textbox for simulation results
