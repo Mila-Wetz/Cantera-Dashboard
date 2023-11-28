@@ -170,7 +170,7 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
     #warnings
     if power_text < 100:
         warning_text = "No combustion possible, increase fuel injection with throttle or air intake properties"
-    else: warning_text = "No warnings"
+    else: warning_text = "No warnings. Engine is running"
     error_textbox.delete(1.0, tk.END)
     error_textbox.insert(tk.END, warning_text)
     
