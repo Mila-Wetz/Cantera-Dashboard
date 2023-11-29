@@ -218,9 +218,13 @@ def update_simulation():
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
 
+#######################################################################################################################
+#                                                                                                                     #
+# Edit the GUI window size by decreasing or increasing the width and height in the following line                     #
+#######################################################################################################################
+width, height = 400, 400  # Dimensions of the canvas.
 
 # Define properties for gauges
-width, height = 400, 400  # Dimensions of the canvas.
 len1, len2 = 0.85, 0.3  # Dimensions of the needle, relative to the canvas ray.
 ray = int(0.7 * width / 2)  # Radius of the dial.
 x0, y0 = width / 2, width / 2  # Position of the center of the circle.
