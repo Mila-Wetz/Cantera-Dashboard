@@ -1,7 +1,7 @@
 # Cantera-Dashboard
 By: Sebastian Riley, Sachin Nair, Mila Wetz
 
-This dashboard is a visual learning tool that allows users to observe how changing various parameters influences the performance of a 4-cylinder internal combustion engine.
+This dashboard is a visual learning tool that runs with the cantera simulation package. This tool allows users to observe how changing various parameters influences the performance of a 4-cylinder internal combustion engine.
 
 The simulation continuously updates as the slider values are changed to increase or decrease factors such as:
 
