@@ -23,6 +23,7 @@ The code then uses the user input data from the sliders to simulate the engine w
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/f62d9cd1-7fd9-4524-b204-ef9bfc112713 width="500" height="400">
 
 The Cantera, tkinter, and matplotlib packages must all be installed before running the file.
-Simply run the 'Programming Simulation Project' file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs. If your inputs are not suitable for combustion with this type of engine, a warning will be displayed to indicate which parameters need to be changed in order to facilitate combustion.
+
+Please download and run the 'Programming Simulation Project' file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs. If your inputs are not suitable for combustion with this type of engine, a warning will be displayed to indicate which parameters need to be changed in order to facilitate combustion.
 
 Depending on what kind of computer you are using, the GUI display might cut off parts of the plots or the gauges. If this happens you may have to edit the window size in the code. There is a box and comments that indicate which line you will have to edit. Try reducing the width and height from 400 to 300 or 200.
