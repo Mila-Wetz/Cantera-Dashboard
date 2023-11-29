@@ -22,4 +22,6 @@ The code then uses the user input data from the sliders to simulate the engine w
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/95dd7daf-61f3-497b-9ab1-ab9a86a186cf width="400" height="400">
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/f62d9cd1-7fd9-4524-b204-ef9bfc112713 width="500" height="400">
 
-Simply run the file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs.
+Simply run the file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs. If your inputs are not suitable for combustion with this type of engine, a warning will be displayed to indicate which parameters need to be changed in order to facilitate combustion.
+
+Depending on what kind of computer you are using, the GUI display might cut off parts of the plots or the gauges. If this happens you may have to edit the window size in the code. There is a box and comments that indicate which line you will have to edit. Try reducing the size of the x and y coordinates from 300 to 200.
