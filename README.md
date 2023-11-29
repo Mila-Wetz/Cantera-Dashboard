@@ -24,4 +24,4 @@ The code then uses the user input data from the sliders to simulate the engine w
 
 Simply run the file and adjust the sliders to match your test parameters to get an overview of the engine simulation with those inputs. If your inputs are not suitable for combustion with this type of engine, a warning will be displayed to indicate which parameters need to be changed in order to facilitate combustion.
 
-Depending on what kind of computer you are using, the GUI display might cut off parts of the plots or the gauges. If this happens you may have to edit the window size in the code. There is a box and comments that indicate which line you will have to edit. Try reducing the size of the x and y coordinates from 300 to 200.
+Depending on what kind of computer you are using, the GUI display might cut off parts of the plots or the gauges. If this happens you may have to edit the window size in the code. There is a box and comments that indicate which line you will have to edit. Try reducing the width and height from 400 to 300 or 200.
