@@ -8,16 +8,8 @@ from tkinter.font import Font
 import cantera as ct
 from scipy.integrate import trapz
 
-# IC Parameters
-d_piston = 0.083  # piston diameter [m]
-epsilon = 20.  # compression ratio [-]
-V_H = .5e-3  # displaced volume [m**3]
-V_oT = V_H / (epsilon - 1.)
-A_piston = .25 * np.pi * d_piston ** 2
-stroke = V_H / A_piston
 
-
-def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
+def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift, Compression_Ratio):
 
     def crank_angle(t):
         """Convert time to crank angle"""
@@ -26,6 +18,14 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
     def piston_speed(t):
         """Approximate piston speed with sinusoidal velocity profile"""
         return - stroke / 2 * 2 * np.pi * Engine_Speed * np.sin(crank_angle(t))
+
+    # IC Parameters
+    d_piston = 0.083   # piston diameter [m]
+    epsilon = Compression_Ratio  # compression ratio [-]
+    V_H = .5e-3  # displaced volume [m**3]
+    V_oT = V_H / (epsilon - 1.)
+    A_piston = .25 * np.pi * d_piston ** 2
+    stroke = V_H / A_piston
 
     # reaction mechanism, kinetics type and compositions
     reaction_mechanism = 'nDodecane_Reitz.yaml'
@@ -42,7 +42,7 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
 
     # turbocharger temperature, pressure, and composition
     T_inlet = 300  # K
-    p_inlet = 1.3e5 + (turbo*1000)  # Pa
+    p_inlet = 1.3e5 + (turbo * 1000)  # Pa
     comp_inlet = comp_air
 
     # outlet pressure
@@ -119,7 +119,7 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
     # Fuel mass, injector open and close timings
     injector_open = (350 - injection_time) / 180. * np.pi
     injector_close = (365 - injection_time) / 180. * np.pi
-    injector_mass = 1.5e-5 + (throttle * .1 * 1.5e-5)   # kg
+    injector_mass = 1.5e-5 + (throttle * .1 * 1.5e-5)  # kg
 
     # injector is modeled as a mass flow controller
     injector_mfc = ct.MassFlowController(injector, cyl)
@@ -166,14 +166,15 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
     # efficiency
     efficiency_text = power_text / Q_text
     efficiency_textbox.delete(1.0, tk.END)  # Clear previous content
-    efficiency_textbox.insert(tk.END, "{:.2f}".format(efficiency_text*100))
-    #warnings
+    efficiency_textbox.insert(tk.END, "{:.2f}".format(efficiency_text * 100))
+    # warnings
     if power_text < 100:
         warning_text = "No combustion possible, increase fuel injection with throttle or air intake properties"
-    else: warning_text = "No warnings. Engine is running"
+    else:
+        warning_text = "No warnings. Engine is running"
     error_textbox.delete(1.0, tk.END)
     error_textbox.insert(tk.END, warning_text)
-    
+
     # AFR to be output to GUI
     total_mdot_in = trapz(states.mdot_in, states.t)
     AFR_text = total_mdot_in / injector_mass
@@ -184,11 +185,9 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift):
 
 
 def update_simulation():
-
     def crank_angle(t):
         """Convert time to crank angle"""
         return np.remainder(2 * np.pi * Engine_Speed * t, 4 * np.pi)
-
 
     # Assign values from GUI to perform simulation
     throttle = throttle_slider.get()
@@ -197,7 +196,8 @@ def update_simulation():
     AFR_adjustment = AFR_slider.get()
     Gearshift = gearshift_slider.get()
     Engine_Speed = (1000. / 60.) * Gearshift  # engine speed [1/s]
-    states = simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift)
+    Compression_Ratio = Compression_Ratio_Slider.get()
+    states = simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift, Compression_Ratio)
 
     # plot crank angle vs pressure
     simulation_plots[0].clear()  # Clear first subplot
@@ -205,7 +205,7 @@ def update_simulation():
     simulation_plots[0].set_xlabel(r'$\phi$ [deg]')
     simulation_plots[0].set_ylabel('Cylinder Pressure (kPa)')
     simulation_plots[0].set_ylim(0, 25000)
-    simulation_plots[0].plot(crank_angle(states.t)*57.6, states.P/1000)
+    simulation_plots[0].plot(crank_angle(states.t) * 57.6, states.P / 1000)
     simulation_plots[0].grid()
 
     # plot volume vs pressure
@@ -213,10 +213,11 @@ def update_simulation():
     simulation_plots[1].set_title('Cylinder Pressure vs Volume')
     simulation_plots[1].set_xlabel(r'Volume ($\times 10^{-4}$ L)')
     simulation_plots[1].set_ylim(0, 25000)
-    simulation_plots[1].plot(states.V*10000, states.P/1000)
+    simulation_plots[1].plot(states.V * 10000, states.P / 1000)
     simulation_plots[1].grid()
     simulation_canvas.draw()
     root.after(100, update_simulation)  # Update every 100ms
+
 
 #######################################################################################################################
 #                                                                                                                     #
@@ -228,14 +229,14 @@ width, height = 400, 400  # Dimensions of the canvas.
 len1, len2 = 0.85, 0.3  # Dimensions of the needle, relative to the canvas ray.
 ray = int(0.7 * width / 2)  # Radius of the dial.
 x0, y0 = width / 2, width / 2  # Position of the center of the circle.
-min_speed, max_speed = 0, 220  # Max and min values on the dial. 
+min_speed, max_speed = 0, 220  # Max and min values on the dial.
 step_speed = 20  # Least count or smallest division on the dial which has a text value displayed.
-min_rpm, max_rpm = 0, 8  # Max and min values on the dial. 
-step_rpm = 1  # Least count or smallest division on the dial which has a text value displayed. 
+min_rpm, max_rpm = 0, 8  # Max and min values on the dial.
+step_rpm = 1  # Least count or smallest division on the dial which has a text value displayed.
 
 root = tk.Tk()
 root.title("Real-Time Diesel Engine Simulation")
-meter_font = Font(family="Tahoma", size=12, weight='normal') 
+meter_font = Font(family="Tahoma", size=12, weight='normal')
 
 # Create engine speed slider
 gearshift_slider = tk.Scale(root, label="Gearshift", from_=1, to=8, orient="vertical")
@@ -257,6 +258,10 @@ injection_time_slider.grid(row=5, column=0, rowspan=2)
 AFR_slider = tk.Scale(root, label="Adjust Air to Fuel Ratio", from_=0, to=10, orient="vertical")
 AFR_slider.grid(row=7, column=0, rowspan=2)
 
+# Create Compression Ratio Slider
+Compression_Ratio_Slider = tk.Scale(root, label="Adjust Engine Compression Ratio", from_=15, to=20, orient="vertical")
+Compression_Ratio_Slider.grid(row=7, column=2, rowspan=2)
+
 # Create power textbox for simulation results
 power_textbox = tk.Text(root, height=1, width=4)
 Label(root, text="Power, kilowatts").grid(row=0, column=0, padx=30)
@@ -277,8 +282,8 @@ AFR_textbox = tk.Text(root, height=1, width=12)
 Label(root, text="Air-Fuel Ratio").grid(row=2, column=0)
 AFR_textbox.grid(row=3, column=0)
 
-#Warning textbox
-error_textbox = tk.Text(root, height= 4, width=32)
+# Warning textbox
+error_textbox = tk.Text(root, height=4, width=32)
 Label(root, text="Warning").grid(row=2, column=1)
 error_textbox.grid(row=3, column=1)
 
@@ -379,4 +384,3 @@ update_simulation()
 root.update_idletasks()
 root.update()
 root.mainloop()
-
