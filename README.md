@@ -9,10 +9,12 @@ The simulation continuously updates as the slider values are changed to increase
   -Air to fuel ratio
   -Air Intake Pressure
   -Throttle levels
+  -Engine Speed
+  -Engine compression ratio
 
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/fe6fec8e-298a-472a-9623-52229cc4a56d width ="500" height="400">
 
-The code then uses the user input data from the sliders to simulate the engine with those parameters. It then plots the changes in cylinder pressure vs crank angle and volume and calculate engine performance factors such as:
+The code then uses the user input data from the sliders to simulate the engine with those parameters. It then plots the changes in cylinder pressure vs crank angle and volume and calculates engine performance factors such as:
 
   -Horsepower
   -Adiabatic Heat Release
