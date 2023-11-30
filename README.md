@@ -1,3 +1,4 @@
+
 # Cantera-Dashboard
 By: Sebastian Riley, Sachin Nair, Mila Wetz
 
@@ -12,7 +13,8 @@ The simulation continuously updates as the slider values are changed to increase
   -Engine Speed
   -Engine compression ratio
 
-<img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/fe6fec8e-298a-472a-9623-52229cc4a56d width ="500" height="400">
+<img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/a6a3bf6e-2c68-487a-ad5b-850ab05ebc54 width ="600" height="350">
+
 
 The code then uses the user input data from the sliders to simulate the engine with those parameters. It then plots the changes in cylinder pressure vs crank angle and volume and calculates engine performance factors such as:
 
