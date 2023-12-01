@@ -35,7 +35,7 @@ The code then uses the user input data from the sliders to simulate the engine w
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/95dd7daf-61f3-497b-9ab1-ab9a86a186cf width="400" height="400">
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/f62d9cd1-7fd9-4524-b204-ef9bfc112713 width="500" height="400">
 
-The Cantera, tkinter, and matplotlib packages must all be installed before running the file. If issues arise when installing cantera for any reason, please refer to the cantera website for official document which provides step by step details on troubleshooting any installation issues. 
+The Cantera, tkinter, and matplotlib packages must all be installed before running the file. If issues arise when installing cantera for any reason, please refer to the cantera website for official documentation which provides step by step details on troubleshooting any installation issues. 
 
 Please download and run the 'Programming Simulation Project' file and play around with the sliders to create unique test parameters to get an overview of the engine simulation with those inputs. If your inputs are not suitable for combustion with this type of engine, a warning will be displayed to indicate which parameters need to be changed in order to facilitate combustion. Sharp peaks in the plots indicate good combustion in the reaction environment. Short curves suggests incomplete combustion and the warning box should give suggestions for improving the quality of the reaction inputs.
 
