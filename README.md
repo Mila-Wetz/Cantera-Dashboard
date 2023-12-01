@@ -12,11 +12,11 @@ The simulation plots and engine performance parameters continuously updates as t
   
     -Throttle levels: The throttle slider operates by varying the mass of the fuel injected for each cycle. Increasing the throttler slider values simulates more fuel injected and ranges from 0 to 10. A typical amount of fuel is injected with the slider at its default value of 0 when initially running the simulation. Increasing the slider to its maximum value of 10 doubles the amount of fuel injected. 
     
-  -Air Intake Pressure: The air intake pressure simulates running a turbocharger/supercharger on the engine by increasing the pressure and density of the air entering the combustion chamber during the air intake stroke. The slider allows the pressure to range from atmospheric up to ten times that much. The slider default value is atmospheric, and ranges up to a maximum value of 10. Increasing the air pressure results in the density to also increase, allowing for more air to enter the chamber. Note to the user: adjusting this value will also slightly change the values for the air to fuel ratio.
+  -Turbo Boost Pressure: The turbo boost pressure slider simulates running a turbocharger/supercharger on the engine by increasing the pressure and density of the air entering the combustion chamber during the air intake stroke. The slider allows the pressure to range from atmospheric up to ten times that much. The slider default value is 0 which provides atmospheric air pressure, and ranges up to a maximum value of 10. Increasing the air pressure results in the density to also increase, allowing for more air to enter the chamber. Note to the user: adjusting this value will also slightly change the values for the air to fuel ratio.
   
   -Gearshift: The gearshift slider attempts to simuate a transmission by adjusting the engine speed at certain operating parameters. The slider ranges from its default value of 1 to a maximum value of 8 which in turn provides engine operating speeds ranging from 1000-8000 rpm at 1000rpm increments. When increasing the engine speed holding all of the other parameters constant, the simulation may result in incomplete combustion. This typically means that combustion is not possible for engine speeds that high. The usual remedy for these scenerios is to increase the throttle, compression ratio, and air to fuel ratio until combustion occurs. 
   
-  -Engine compression ratio: The engine compression ratio is an engine design parameter that is computed by dividing the volume of the cylinder bore when the engine is at bottom dead center by the volume of the combustion chamber when the engine is at top dead center. The default value of the slider is 15 and can be increased up to 20 which are typical values for diesel engines. Increasing the compression results in more complete combustion and higher engine performance parameters mainly due to the fact the diesel engine depend on sufficient compression for the fuel to ignite and combustion to occur. 
+  -Engine compression ratio: The engine compression ratio is an engine design parameter that is computed by dividing the volume of the cylinder bore when the engine is at bottom dead center by the volume of the combustion chamber when the engine is at top dead center. The default value of the slider is 15 and can be increased up to 20 which are typical compression ratio values for diesel engines. Increasing the compression results in more complete combustion and higher engine performance parameters mainly due to the fact the diesel engine depend on sufficient compression for the fuel to ignite and combustion to occur. 
 
   
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/a6a3bf6e-2c68-487a-ad5b-850ab05ebc54 width ="600" height="350">
@@ -24,10 +24,13 @@ The simulation plots and engine performance parameters continuously updates as t
 
 The code then uses the user input data from the sliders to simulate the engine with those parameters. It then plots the changes in cylinder pressure vs crank angle and volume and calculates engine performance factors such as:
 
-  -Horsepower
-  -Adiabatic Heat Release
-  -Efficiency
-  -Air-to-Fuel Ratio
+  -Horsepower: The engine work can be either calculated by the area enclosed by the pressure vs volume curves, and by multiplying the cylinder pressure by the differential volume (Pdv work) at each incremental crank angle increase during the engine cycle. The engine power is engine work per unit time and was calculated using the cylinder pressure, piston area, and piston speed. 
+  
+  -Adiabatic Heat Release: The adiabatic heat release is a parameter used to estimate the amount of heat input due to combustion. Calculations for this parameter are built in cantera methods that allow us to take into account not only PdV, but also ratio of specific heat as a function of temperature and fuel kinetics. 
+  
+  -Efficiency: Engine efficiency is calculated by dividing the engine work produced by the amount of adiabatic heat release. Note to user: These efficiencies are higher than typical values we see in our vehicles engines. This is mainly due to mechanical friction and stray heat losses as the engine is running through its cycle. The simulation does not take these factors in account.
+  
+  -Air-to-Fuel Ratio: The air to fuel ratio is calculated by dividing the amount of air mass by the amount of fuel mass injected each cycle. 
 
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/95dd7daf-61f3-497b-9ab1-ab9a86a186cf width="400" height="400">
 <img src=https://github.com/Mila-Wetz/Cantera-Dashboard/assets/143420424/f62d9cd1-7fd9-4524-b204-ef9bfc112713 width="500" height="400">
