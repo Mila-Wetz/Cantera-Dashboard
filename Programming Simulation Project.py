@@ -59,7 +59,7 @@ def simulation(throttle, turbo, injection_time, AFR_adjustment, Gearshift, Compr
     comp_ambient = comp_air
 
     # Inlet valve friction coefficient, open and close timings
-    inlet_valve_coeff = 1.e-6 + (AFR_adjustment * 1.e-6)
+    inlet_valve_coeff = 2.75e-7 + (AFR_adjustment * 3.5e-6)
     inlet_open = -18. / 180. * np.pi
     inlet_close = 198. / 180. * np.pi
 
